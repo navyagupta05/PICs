@@ -1,2 +1,2 @@
 # PICs
-An Iinteractive guide to Photonic Integrated Circuits.
+An interactive guide to Photonic Integrated Circuits.
