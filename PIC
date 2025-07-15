@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Guide to Silicon Photonics Design</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: The SPA is designed as a guided tour, starting with the high-level paradigm, moving to explorable components, then detailing the design workflow and key challenges, and concluding with a case study. This structure transforms the textbook format into a logical, interactive narrative, facilitating understanding by breaking down complexity into thematic, interconnected modules. A fixed sidebar allows for both guided and non-linear exploration. -->
+    <!-- Visualization & Content Choices: The application uses a mix of interactive elements to match content goals. Informational sections use structured text and icons. Comparative sections (like I/O and lasers) use togglable tables, side-by-side layouts, and Chart.js bar charts for clear, quantitative comparisons. The design workflow is visualized as an interactive HTML/CSS flowchart. Component details are shown in cards with diagrams and dynamic Chart.js line charts to illustrate performance characteristics (e.g., ring resonator spectrum). This approach prioritizes user engagement and clarity. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #1e293b; /* slate-800 */
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .nav-link.active, .nav-link:hover {
+            background-color: #e2e8f0; /* slate-200 */
+            color: #0f172a; /* slate-900 */
+            transform: translateX(4px);
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .tab-button.active {
+            background-color: #334155; /* slate-700 */
+            color: #f1f5f9; /* slate-100 */
+        }
+        .flowchart-step {
+            transition: all 0.3s ease;
+            border-left-width: 4px;
+        }
+        .flowchart-step.active {
+            background-color: #f1f5f9; /* slate-100 */
+            border-color: #64748b; /* slate-500 */
+        }
+        .flowchart-arrow {
+            color: #94a3b8; /* slate-400 */
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar Navigation -->
+        <aside class="w-1/5 bg-white border-r border-slate-200 p-6 sticky top-0 h-screen hidden md:block">
+            <h1 class="text-xl font-bold text-slate-900 mb-2">Silicon Photonics</h1>
+            <p class="text-sm text-slate-500 mb-8">An Interactive Guide</p>
+            <nav id="navigation" class="space-y-2">
+                <a data-target="paradigm" class="nav-link active flex items-center p-2 rounded-lg text-slate-600">
+                    <span class="mr-3 text-lg">💡</span> The New Paradigm
+                </a>
+                <a data-target="components" class="nav-link flex items-center p-2 rounded-lg text-slate-600">
+                    <span class="mr-3 text-lg">🧱</span> Building Blocks
+                </a>
+                <a data-target="workflow" class="nav-link flex items-center p-2 rounded-lg text-slate-600">
+                    <span class="mr-3 text-lg">🔄</span> Design Workflow
+                </a>
+                <a data-target="challenges" class="nav-link flex items-center p-2 rounded-lg text-slate-600">
+                    <span class="mr-3 text-lg">⚖️</span> Key Challenges
+                </a>
+                <a data-target="casestudy" class="nav-link flex items-center p-2 rounded-lg text-slate-600">
+                    <span class="mr-3 text-lg">🔬</span> Case Study: WDM
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="w-full md:w-4/5 p-6 md:p-10 lg:p-12 overflow-y-auto">
+
+            <!-- Section 1: The New Paradigm -->
+            <section id="paradigm" class="content-section active">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">The Fabless Revolution in Photonics</h2>
+                <p class="text-lg text-slate-600 mb-8 max-w-4xl">
+                    Silicon photonics represents a fundamental shift from specialized, expensive manufacturing to a streamlined, scalable "fabless" model. By leveraging the immense infrastructure of the existing CMOS electronics industry, it's now possible to design complex photonic integrated circuits (PICs) in a cost-effective way. This section introduces the core concepts driving this transformation.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-xl border border-slate-200">
+                        <h3 class="font-semibold text-slate-900 mb-2">CMOS Foundry Leverage</h3>
+                        <p class="text-slate-600 text-sm">By adapting established microelectronics processes, silicon photonics gains access to unparalleled manufacturing scale, precision, and cost-efficiency, accelerating the path from research to commercial products.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border border-slate-200">
+                        <h3 class="font-semibold text-slate-900 mb-2">Multi-Project Wafers (MPW)</h3>
+                        <p class="text-slate-600 text-sm">MPW services allow multiple designers to share the cost of a single fabrication run. This democratization of access dramatically lowers the barrier to entry for startups and researchers, fueling rapid innovation.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border border-slate-200">
+                        <h3 class="font-semibold text-slate-900 mb-2">From Devices to Systems</h3>
+                        <p class="text-slate-600 text-sm">The focus is shifting from inventing individual components to integrating libraries of "good enough" devices into complex Application-Specific Photonic Integrated Circuits (AS-PICs), mirroring the evolution of electronics design.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: Building Blocks -->
+            <section id="components" class="content-section">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">The Building Blocks of a Photonic Circuit</h2>
+                <p class="text-lg text-slate-600 mb-8 max-w-4xl">
+                    Every complex photonic system is built from a set of fundamental components that guide, split, filter, and modulate light. The performance of these devices is defined by their geometry and the properties of silicon. Explore some of the key passive and active components below. Click on a component to see its details.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="component-grid">
+                    <!-- Component cards will be inserted here by JS -->
+                </div>
+                 <div id="component-details" class="mt-8 bg-white p-6 rounded-xl border border-slate-200 hidden">
+                    <!-- Details of selected component will be shown here -->
+                </div>
+            </section>
+
+            <!-- Section 3: Design Workflow -->
+            <section id="workflow" class="content-section">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">The Hierarchical Design Workflow</h2>
+                <p class="text-lg text-slate-600 mb-8 max-w-4xl">
+                    Designing a complex PIC is not a single-step process. It requires a hierarchical workflow that moves from detailed physical simulations of individual components to abstracted system-level verification. This approach, enabled by Process Design Kits (PDKs) from foundries, is the only way to manage complexity and ensure a design is both functionally correct and manufacturable. Click on each step to learn more.
+                </p>
+                <div class="lg:flex lg:space-x-8">
+                    <div class="lg:w-1/3">
+                        <div id="flowchart" class="space-y-1">
+                            <!-- Flowchart steps will be inserted here by JS -->
+                        </div>
+                    </div>
+                    <div id="workflow-details" class="lg:w-2/3 mt-6 lg:mt-0">
+                        <!-- Workflow details will be inserted here by JS -->
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Section 4: Key Challenges -->
+            <section id="challenges" class="content-section">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Key Design Challenges & Trade-offs</h2>
+                 <p class="text-lg text-slate-600 mb-8 max-w-4xl">
+                    While powerful, silicon photonics design involves navigating critical trade-offs. Two of the most important challenges are getting light onto and off of the chip efficiently, and integrating a light source. The choices made here have system-wide implications for performance, cost, and scalability.
+                </p>
+                
+                <!-- Optical I/O Challenge -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 mb-8">
+                    <h3 class="text-2xl font-semibold text-slate-800 mb-4">Challenge 1: Optical I/O - The Chip-to-World Interface</h3>
+                    <p class="text-slate-600 mb-6">A massive mode-size mismatch exists between a standard optical fiber (~10µm diameter) and a sub-micron silicon waveguide. Solving this is critical. Below, compare the two leading solutions: Grating Couplers and Edge Couplers.</p>
+                    <div id="io-comparison" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-bold text-lg mb-2 text-center">Grating Coupler</h4>
+                            <div class="w-48 h-32 bg-slate-100 mx-auto rounded-lg flex flex-col justify-end items-center p-2 border-2 border-slate-300">
+                                <div class="text-sm text-slate-500">Fiber (↓)</div>
+                                <div class="w-24 h-2 bg-yellow-300 -mb-2 transform -rotate-12"></div>
+                                <div class="w-32 h-1 bg-slate-600 flex justify-around">
+                                    <div class="w-px h-2 bg-slate-400"></div><div class="w-px h-2 bg-slate-400"></div><div class="w-px h-2 bg-slate-400"></div><div class="w-px h-2 bg-slate-400"></div>
+                                </div>
+                                <div class="w-full h-4 bg-slate-300"></div>
+                                <div class="w-full h-8 bg-slate-400"></div>
+                            </div>
+                            <ul class="mt-4 list-disc list-inside text-slate-600 text-sm space-y-1">
+                                <li><span class="font-semibold text-green-600">Pro:</span> Enables wafer-scale testing.</li>
+                                <li><span class="font-semibold text-green-600">Pro:</span> Relaxed alignment tolerance.</li>
+                                <li><span class="font-semibold text-red-600">Con:</span> Higher insertion loss.</li>
+                                <li><span class="font-semibold text-red-600">Con:</span> Narrow optical bandwidth.</li>
+                            </ul>
+                        </div>
+                        <div>
+                             <h4 class="font-bold text-lg mb-2 text-center">Edge Coupler</h4>
+                             <div class="w-48 h-32 bg-slate-100 mx-auto rounded-lg flex justify-start items-center p-2 border-2 border-slate-300">
+                                <div class="text-sm text-slate-500 mr-2">Fiber (→)</div>
+                                <div class="w-8 h-8 bg-yellow-300 rounded-full"></div>
+                                <div class="w-2 h-1 bg-slate-600"></div>
+                                <div class="w-24 h-12 bg-slate-100 flex items-center">
+                                    <div style="width: 0; height: 0; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-left: 12px solid #475569;"></div>
+                                    <div class="w-20 h-1 bg-slate-600"></div>
+                                </div>
+                             </div>
+                             <ul class="mt-4 list-disc list-inside text-slate-600 text-sm space-y-1">
+                                <li><span class="font-semibold text-green-600">Pro:</span> Very low insertion loss.</li>
+                                <li><span class="font-semibold text-green-600">Pro:</span> Extremely broad bandwidth.</li>
+                                <li><span class="font-semibold text-red-600">Con:</span> Requires dicing; no wafer-scale test.</li>
+                                <li><span class="font-semibold text-red-600">Con:</span> Sub-micron alignment precision needed.</li>
+                            </ul>
+                        </div>
+                    </div>
+                     <div class="mt-6">
+                        <div class="chart-container">
+                            <canvas id="ioChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Laser Integration Challenge -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200">
+                     <h3 class="text-2xl font-semibold text-slate-800 mb-4">Challenge 2: Laser Integration - The On-Chip Light Source</h3>
+                     <p class="text-slate-600 mb-6">Silicon's indirect bandgap makes it a terrible light emitter. Therefore, integrating a III-V semiconductor (like InP) laser source is essential but difficult. Explore the trade-offs between the primary integration strategies. Click a row for details.</p>
+                     <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-slate-500">
+                            <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 rounded-l-lg">Approach</th>
+                                    <th scope="col" class="px-6 py-3">Performance</th>
+                                    <th scope="col" class="px-6 py-3">Scalability</th>
+                                    <th scope="col" class="px-6 py-3 rounded-r-lg">Maturity</th>
+                                </tr>
+                            </thead>
+                            <tbody id="laser-table-body">
+                                <!-- Laser table rows will be inserted here by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="laser-details" class="mt-4 p-4 bg-slate-50 rounded-lg text-slate-600 hidden"></div>
+                </div>
+            </section>
+
+            <!-- Section 5: Case Study -->
+            <section id="casestudy" class="content-section">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">System in Practice: WDM Transmitter</h2>
+                <p class="text-lg text-slate-600 mb-8 max-w-4xl">
+                    Let's apply these concepts to a real-world system: a multi-channel Wavelength Division Multiplexed (WDM) transmitter. The goal is to encode multiple high-speed data streams onto different wavelengths of light and combine them into a single fiber. This case study compares two architectures based on power-efficient ring modulators.
+                </p>
+                 <div class="bg-white p-6 rounded-xl border border-slate-200">
+                    <div class="flex justify-center mb-6">
+                        <div class="inline-flex rounded-md shadow-sm" role="group">
+                            <button type="button" data-view="wdm-diagram" class="wdm-tab-button active px-4 py-2 text-sm font-medium text-slate-900 bg-white border border-slate-200 rounded-l-lg hover:bg-slate-100 focus:z-10 focus:ring-2 focus:ring-blue-700">Architecture</button>
+                            <button type="button" data-view="wdm-comparison" class="wdm-tab-button px-4 py-2 text-sm font-medium text-slate-900 bg-white border-t border-b border-slate-200 hover:bg-slate-100 focus:z-10 focus:ring-2 focus:ring-blue-700">Comparison</button>
+                            <button type="button" data-view="wdm-performance" class="wdm-tab-button px-4 py-2 text-sm font-medium text-slate-900 bg-white border border-slate-200 rounded-r-md hover:bg-slate-100 focus:z-10 focus:ring-2 focus:ring-blue-700">Performance</button>
+                        </div>
+                    </div>
+
+                    <div id="wdm-diagram" class="wdm-view active">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                             <div>
+                                <h4 class="font-bold text-lg mb-2 text-center">Common-Bus Architecture</h4>
+                                 <div class="w-full h-40 bg-slate-100 mx-auto rounded-lg flex flex-col justify-center items-center p-4 border-2 border-slate-300 relative">
+                                    <div class="absolute left-2 top-1/2 -translate-y-1/2 text-sm text-slate-500">Comb<br/>Laser<br/>(λ1,λ2,λ3)</div>
+                                    <div class="absolute w-full h-1 bg-slate-600 top-1/2 -translate-y-1/2"></div>
+                                    <div class="w-full flex justify-around items-center">
+                                        <div class="flex flex-col items-center">
+                                            <div class="w-10 h-10 border-2 border-blue-500 rounded-full -mb-5 z-10 bg-slate-100"></div>
+                                            <div class="text-xs mt-8">Mod λ1</div>
+                                        </div>
+                                         <div class="flex flex-col items-center">
+                                            <div class="w-10 h-10 border-2 border-green-500 rounded-full -mb-5 z-10 bg-slate-100"></div>
+                                            <div class="text-xs mt-8">Mod λ2</div>
+                                        </div>
+                                         <div class="flex flex-col items-center">
+                                            <div class="w-10 h-10 border-2 border-red-500 rounded-full -mb-5 z-10 bg-slate-100"></div>
+                                            <div class="text-xs mt-8">Mod λ3</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                             <div>
+                                <h4 class="font-bold text-lg mb-2 text-center">Mod-Mux Architecture</h4>
+                                <div class="w-full h-40 bg-slate-100 mx-auto rounded-lg flex flex-col justify-center items-center p-4 border-2 border-slate-300 relative">
+                                    <div class="absolute w-full h-1 bg-slate-600 bottom-8"></div>
+                                    <div class="w-full flex justify-around items-start h-full">
+                                        <div class="flex flex-col items-center">
+                                            <span class="text-xs">Laser λ1</span>
+                                            <div class="w-8 h-8 border-2 border-blue-500 rounded-full bg-slate-100"></div>
+                                            <div class="w-px h-4 bg-slate-400"></div>
+                                            <div class="w-8 h-8 border-2 border-blue-500 rounded-full -mb-4 z-10 bg-slate-100"></div>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <span class="text-xs">Laser λ2</span>
+                                            <div class="w-8 h-8 border-2 border-green-500 rounded-full bg-slate-100"></div>
+                                            <div class="w-px h-4 bg-slate-400"></div>
+                                            <div class="w-8 h-8 border-2 border-green-500 rounded-full -mb-4 z-10 bg-slate-100"></div>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <span class="text-xs">Laser λ3</span>
+                                            <div class="w-8 h-8 border-2 border-red-500 rounded-full bg-slate-100"></div>
+                                            <div class="w-px h-4 bg-slate-400"></div>
+                                            <div class="w-8 h-8 border-2 border-red-500 rounded-full -mb-4 z-10 bg-slate-100"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="wdm-comparison" class="wdm-view hidden">
+                       <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-slate-500">
+                            <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 rounded-l-lg">Feature</th>
+                                    <th scope="col" class="px-6 py-3">Common-Bus</th>
+                                    <th scope="col" class="px-6 py-3 rounded-r-lg">Mod-Mux</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="bg-white border-b">
+                                    <td class="px-6 py-4 font-medium text-slate-900">Component Count</td>
+                                    <td class="px-6 py-4">Low (1 bus, N rings)</td>
+                                    <td class="px-6 py-4">High (N lasers, 2N rings)</td>
+                                </tr>
+                                <tr class="bg-white border-b">
+                                    <td class="px-6 py-4 font-medium text-slate-900">Channel Isolation</td>
+                                    <td class="px-6 py-4">Lower (shared bus)</td>
+                                    <td class="px-6 py-4">High (dedicated paths)</td>
+                                </tr>
+                                <tr class="bg-white border-b">
+                                    <td class="px-6 py-4 font-medium text-slate-900">Control Complexity</td>
+                                    <td class="px-6 py-4">High (complex thermal stabilization)</td>
+                                    <td class="px-6 py-4">Lower (simple feedback loops)</td>
+                                </tr>
+                                <tr class="bg-white">
+                                    <td class="px-6 py-4 font-medium text-slate-900">Wavelength Flexibility</td>
+                                    <td class="px-6 py-4">High (can assign rings to lasers)</td>
+                                    <td class="px-6 py-4">Low (strict laser-ring matching)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div id="wdm-performance" class="wdm-view hidden">
+                        <p class="text-center text-slate-600 mb-4">Both architectures successfully demonstrated high performance, achieving <strong>40 Gbit/s per channel</strong> with an excellent power efficiency of just <strong>32 fJ/bit</strong>. This showcases the viability of ring-based WDM systems, with the choice of architecture depending on the specific system's priority: component efficiency (Common-Bus) or control simplicity and isolation (Mod-Mux).</p>
+                         <div class="chart-container">
+                            <canvas id="wdmChart"></canvas>
+                        </div>
+                    </div>
+                 </div>
+
+            </section>
+        </main>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    const app = {
+        navigation: {
+            links: document.querySelectorAll('#navigation .nav-link'),
+            sections: document.querySelectorAll('.content-section'),
+            init() {
+                this.links.forEach(link => {
+                    link.addEventListener('click', (e) => this.handleNavClick(e));
+                });
+            },
+            handleNavClick(e) {
+                const targetId = e.currentTarget.dataset.target;
+                
+                this.links.forEach(link => link.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                
+                this.sections.forEach(section => {
+                    section.classList.remove('active');
+                    if (section.id === targetId) {
+                        section.classList.add('active');
+                    }
+                });
+            }
+        },
+
+        components: {
+            data: [
+                { id: 'waveguide', name: 'Waveguide', description: 'The fundamental structure that confines and guides light on the chip. Performance is defined by its geometry (strip vs. rib) and material properties. Loss is primarily caused by sidewall roughness from etching.', chartType: 'line', chartData: { labels: ['1530nm', '1540nm', '1550nm', '1560nm', '1570nm'], datasets: [{ label: 'Propagation Loss (dB/cm)', data: [2.8, 2.5, 2.3, 2.4, 2.6], borderColor: '#3b82f6', tension: 0.1 }] } },
+                { id: 'mzi', name: 'Mach-Zehnder Interferometer (MZI)', description: 'An interferometric structure that splits light into two paths and recombines it. The output is a sinusoidal function of the phase difference between the arms, making it ideal for modulators and switches.', chartType: 'line', chartData: { labels: ['1545nm', '1550nm', '1555nm', '1560nm'], datasets: [{ label: 'Transmission', data: [0.05, 1, 0.05, 1], borderColor: '#10b981', tension: 0.4 }] } },
+                { id: 'ring', name: 'Ring Resonator', description: 'A looped waveguide coupled to a bus. At resonant wavelengths, light builds up inside the ring, creating sharp notches in the transmission spectrum. Highly sensitive to dimensions, making it perfect for filters and compact modulators.', chartType: 'line', chartData: { labels: ['1548nm', '1549nm', '1550nm', '1551nm', '1552nm'], datasets: [{ label: 'Transmission', data: [1, 0.9, 0.02, 0.9, 1], borderColor: '#ef4444', tension: 0.4 }] } },
+                { id: 'grating', name: 'Bragg Grating', description: 'A waveguide with periodic corrugations on its sidewalls. It acts as a wavelength-selective mirror, reflecting a narrow band of light around the Bragg wavelength while transmitting others.', chartType: 'line', chartData: { labels: ['1540nm', '1545nm', '1550nm', '1555nm', '1560nm'], datasets: [{ label: 'Reflectivity', data: [0.05, 0.4, 0.98, 0.4, 0.05], borderColor: '#f97316', tension: 0.4 }] } },
+                { id: 'modulator', name: 'PN-Junction Modulator', description: 'An active device that uses the plasma dispersion effect. Applying a reverse voltage to a PN junction depletes carriers, changing the refractive index to modulate the phase of light at high speeds (GHz).', chartType: 'line', chartData: { labels: ['-2V', '-1V', '0V', '1V (Forward)'], datasets: [{ label: 'Phase Shift (rad)', data: [Math.PI, Math.PI/2, 0, -Math.PI/4], borderColor: '#8b5cf6', tension: 0.1 }] } },
+                { id: 'detector', name: 'Germanium Photodetector', description: 'Converts optical signals back to electrical current. Germanium is integrated onto silicon to absorb light at telecom wavelengths. Performance is defined by responsivity, bandwidth, and dark current.', chartType: 'bar', chartData: { labels: ['Responsivity (A/W)', 'Bandwidth (GHz)', 'Dark Current (nA)'], datasets: [{ label: 'Typical Performance', data: [0.8, 50, 20], backgroundColor: ['#3b82f6', '#10b981', '#ef4444'] }] } }
+            ],
+            grid: document.getElementById('component-grid'),
+            details: document.getElementById('component-details'),
+            chart: null,
+            init() {
+                this.renderGrid();
+            },
+            renderGrid() {
+                this.grid.innerHTML = this.data.map(item => `
+                    <div data-id="${item.id}" class="component-card bg-white p-4 rounded-xl border border-slate-200 cursor-pointer hover:shadow-md hover:-translate-y-1 transition-all duration-200">
+                        <h3 class="font-semibold text-slate-900 mb-2">${item.name}</h3>
+                        <p class="text-slate-600 text-sm">${item.description.split('.')[0]}.</p>
+                    </div>
+                `).join('');
+                document.querySelectorAll('.component-card').forEach(card => {
+                    card.addEventListener('click', (e) => this.showDetails(e.currentTarget.dataset.id));
+                });
+            },
+            showDetails(id) {
+                const component = this.data.find(item => item.id === id);
+                if (!component) return;
+                
+                this.details.classList.remove('hidden');
+                this.details.innerHTML = `
+                    <h3 class="text-xl font-bold mb-2">${component.name}</h3>
+                    <p class="text-slate-600 mb-4">${component.description}</p>
+                    <div class="chart-container">
+                        <canvas id="component-chart"></canvas>
+                    </div>
+                `;
+                
+                if (this.chart) {
+                    this.chart.destroy();
+                }
+
+                this.chart = new Chart(document.getElementById('component-chart'), {
+                    type: component.chartType,
+                    data: component.chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
+                 this.details.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        },
+
+        workflow: {
+            data: [
+                { id: 'physics', title: '1. Physics & Component Simulation', description: 'The process starts at the lowest level. Tools like FDTD and Eigenmode Solvers are used to simulate the fundamental physics of a small component (e.g., a directional coupler). This is computationally intensive but provides the most accurate physical model of how the device will behave, determining its optical response (transmission, reflection, phase) across different wavelengths.' },
+                { id: 'compact', title: '2. Compact Model Generation', description: 'The detailed physics simulation results are distilled into a computationally efficient "compact model". This is often a set of S-parameters that acts as a mathematical black box, perfectly describing the component\'s input/output relationships without needing to re-solve Maxwell\'s equations. This abstraction is key to enabling large-scale simulation.' },
+                { id: 'system', title: '3. System-Level Circuit Simulation', description: 'Using the library of compact models, the designer simulates the entire photonic circuit. In a tool like Lumerical INTERCONNECT, thousands of components can be connected to verify the overall system functionality, optimize performance, and iterate on the design before committing to the expensive fabrication process. This step answers the question: "Does my circuit work as intended?"' },
+                { id: 'layout', title: '4. Schematic-Driven Layout (SDL)', description: 'The verified schematic is translated into a physical layout. Modern tools use a Schematic-Driven Layout flow where each component in the schematic corresponds to a pre-defined layout cell from the Process Design Kit (PDK). The designer places these cells and uses routing tools to draw the physical waveguide connections.' },
+                { id: 'verification', title: '5. Verification (DRC & LVS)', description: 'This is the final, critical check. Design Rule Checking (DRC) ensures the layout is physically manufacturable according to the foundry\'s rules. Layout Versus Schematic (LVS) confirms that the physical layout is a faithful implementation of the original, simulated schematic. A design that passes DRC and LVS is ready for fabrication hand-off.' }
+            ],
+            container: document.getElementById('flowchart'),
+            details: document.getElementById('workflow-details'),
+            init() {
+                this.render();
+                this.setActive('physics'); 
+            },
+            render() {
+                this.container.innerHTML = this.data.map((step, index) => `
+                    <div data-id="${step.id}" class="flowchart-step p-4 rounded-lg cursor-pointer border-l-4 border-transparent">
+                        <h4 class="font-semibold text-slate-800">${step.title}</h4>
+                    </div>
+                    ${index < this.data.length - 1 ? '<div class="pl-5 h-8 flex items-center"><span class="flowchart-arrow text-2xl">↓</span></div>' : ''}
+                `).join('');
+                document.querySelectorAll('.flowchart-step').forEach(step => {
+                    step.addEventListener('click', (e) => this.setActive(e.currentTarget.dataset.id));
+                });
+            },
+            setActive(id) {
+                const stepData = this.data.find(s => s.id === id);
+                if (!stepData) return;
+
+                document.querySelectorAll('.flowchart-step').forEach(el => {
+                    el.classList.remove('active');
+                    if (el.dataset.id === id) {
+                        el.classList.add('active');
+                    }
+                });
+                
+                this.details.innerHTML = `
+                    <div class="bg-white p-6 rounded-xl border border-slate-200">
+                        <h3 class="text-xl font-bold text-slate-900 mb-2">${stepData.title}</h3>
+                        <p class="text-slate-600">${stepData.description}</p>
+                    </div>`;
+            }
+        },
+
+        challenges: {
+            laserData: [
+                { approach: 'External Laser', perf: 'High', scale: 'Low', maturity: 'High', details: 'The simplest approach. A high-performance laser is kept off-chip and connected via fiber. This decouples the laser from the PIC but is expensive and not scalable for systems needing many lasers.' },
+                { approach: 'Co-Packaging', perf: 'High', scale: 'Medium', maturity: 'Medium', details: 'A pre-tested laser die is integrated in the same package as the PIC, often using flip-chip bonding. A good compromise between performance and integration complexity.' },
+                { approach: 'Hybrid Integration', perf: 'High', scale: 'High', maturity: 'Low (Research)', details: 'A III-V gain material wafer is bonded directly onto the silicon wafer. This allows lasers to be defined with high-precision lithography but adds significant fabrication complexity.' },
+                { approach: 'Monolithic Growth', perf: 'Moderate', scale: 'Highest', maturity: 'Very Low (R&D)', details: 'The "holy grail": growing the laser material directly on the silicon wafer. Extremely challenging due to material mismatches but offers the lowest cost in high-volume production.' }
+            ],
+            laserTableBody: document.getElementById('laser-table-body'),
+            laserDetails: document.getElementById('laser-details'),
+            init() {
+                this.renderLaserTable();
+                this.initIoChart();
+            },
+            renderLaserTable() {
+                this.laserTableBody.innerHTML = this.laserData.map(item => `
+                    <tr class="bg-white border-b hover:bg-slate-50 cursor-pointer laser-row" data-approach="${item.approach}">
+                        <td class="px-6 py-4 font-medium text-slate-900">${item.approach}</td>
+                        <td class="px-6 py-4">${item.perf}</td>
+                        <td class="px-6 py-4">${item.scale}</td>
+                        <td class="px-6 py-4">${item.maturity}</td>
+                    </tr>
+                `).join('');
+                document.querySelectorAll('.laser-row').forEach(row => {
+                    row.addEventListener('click', (e) => this.showLaserDetails(e.currentTarget.dataset.approach));
+                });
+            },
+            showLaserDetails(approach) {
+                 const laser = this.laserData.find(l => l.approach === approach);
+                 if (!laser) return;
+
+                 this.laserDetails.innerHTML = `<p><strong class="text-slate-800">${laser.approach}:</strong> ${laser.details}</p>`;
+                 this.laserDetails.classList.remove('hidden');
+
+                 document.querySelectorAll('.laser-row').forEach(r => r.classList.remove('bg-slate-100'));
+                 document.querySelector(`.laser-row[data-approach="${approach}"]`).classList.add('bg-slate-100');
+            },
+            initIoChart() {
+                new Chart(document.getElementById('ioChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Insertion Loss (dB)', 'Bandwidth (nm)'],
+                        datasets: [
+                            { label: 'Grating Coupler', data: [2.0, 40], backgroundColor: '#3b82f6' },
+                            { label: 'Edge Coupler', data: [0.5, 150], backgroundColor: '#10b981' }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { title: { display: true, text: 'I/O Coupler Performance Comparison' } },
+                        scales: { y: { beginAtZero: true, type: 'logarithmic' } }
+                    }
+                });
+            }
+        },
+
+        caseStudy: {
+            tabs: document.querySelectorAll('.wdm-tab-button'),
+            views: document.querySelectorAll('.wdm-view'),
+            init() {
+                this.tabs.forEach(tab => {
+                    tab.addEventListener('click', (e) => this.handleTabClick(e));
+                });
+                this.initWdmChart();
+            },
+            handleTabClick(e) {
+                const targetId = e.currentTarget.dataset.view;
+                this.tabs.forEach(tab => tab.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+
+                this.views.forEach(view => {
+                    view.classList.add('hidden');
+                    view.classList.remove('active');
+                    if (view.id === targetId) {
+                        view.classList.remove('hidden');
+                        view.classList.add('active');
+                    }
+                });
+            },
+            initWdmChart() {
+                new Chart(document.getElementById('wdmChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Data Rate/Channel (Gb/s)', 'Power Efficiency (fJ/bit)'],
+                        datasets: [
+                            { label: 'Achieved Performance', data: [40, 32], backgroundColor: ['#8b5cf6', '#10b981'] }
+                        ]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false }, title: { display: true, text: 'WDM Transmitter Performance' } },
+                        scales: { x: { beginAtZero: true } }
+                    }
+                });
+            }
+        },
+        
+        init() {
+            this.navigation.init();
+            this.components.init();
+            this.workflow.init();
+            this.challenges.init();
+            this.caseStudy.init();
+        }
+    };
+
+    app.init();
+});
+</script>
+</body>
+</html>
